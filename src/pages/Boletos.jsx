@@ -1,10 +1,16 @@
 import { Box, Heading } from '@chakra-ui/react'
+import { Button } from '@chakra-ui/react'
+import { Link } from 'react-router-dom'
+
 
 function Boletos() {
   return (
-    <Box p={6}>
-      <Heading>Boletos</Heading>
-    </Box>
+    <Link to="/boletos/novo">
+  <Button colorScheme="teal" mb={4}>
+    Novo Boleto
+  </Button>
+</Link>
+    
   )
 }
 

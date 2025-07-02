@@ -1,11 +1,11 @@
-import { Box, Heading, Button } from '@chakra-ui/react'
+import { BrowserRouter } from 'react-router-dom'
+import AppRoutes from './routes'
 
 function App() {
   return (
-    <Box p={6}>
-      <Heading mb={4}>Sistema de Controle de Loja</Heading>
-      <Button colorScheme="teal">Botão de Teste</Button>
-    </Box>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   )
 }
 

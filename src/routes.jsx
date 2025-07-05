@@ -6,6 +6,7 @@ import Despesas from './pages/Despesas.jsx'
 import Vendas from './pages/Vendas.jsx'
 import Fiados from './pages/Fiados.jsx'
 import Relatorios from './pages/Relatorios.jsx'
+import NovoBoleto from './pages/NovoBoleto.jsx'
 
 function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ function AppRoutes() {
         <Route path="/vendas" element={<Vendas />} />
         <Route path="/fiados" element={<Fiados />} />
         <Route path="/relatorios" element={<Relatorios />} />
+        <Route path="/boletos/novo" element={<NovoBoleto />} />
       </Route>
     </Routes>
   )

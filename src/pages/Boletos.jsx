@@ -20,6 +20,13 @@ import {
   ModalCloseButton,
   ModalBody,
   Text,
+  Input,
+  Select,
+  Flex,
+  InputGroup,
+  InputLeftAddon,
+  Divider,
+  Stack,
 } from '@chakra-ui/react'
 import { Link as RouterLink } from 'react-router-dom'
 import { useState } from 'react'
@@ -29,6 +36,12 @@ function Boletos() {
   const { boletos, marcarComoPago, removerBoleto } = useBoletos()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [boletoSelecionado, setBoletoSelecionado] = useState(null)
+
+  const [statusFiltro, setStatusFiltro] = useState('')
+  const [fornecedorFiltro, setFornecedorFiltro] = useState('')
+  const [valorMinimo, setValorMinimo] = useState('')
+  const [valorMaximo, setValorMaximo] = useState('')
+  const [ordem, setOrdem] = useState('')
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -48,6 +61,27 @@ function Boletos() {
     onOpen()
   }
 
+  let boletosFiltrados = boletos.filter((b) => {
+    const fornecedorOk = fornecedorFiltro.trim() === '' || b.fornecedor?.toLowerCase().includes(fornecedorFiltro.toLowerCase())
+    const statusOk = statusFiltro === '' || b.status === statusFiltro
+    const valorOk =
+      (!valorMinimo || parseFloat(b.valor) >= parseFloat(valorMinimo)) &&
+      (!valorMaximo || parseFloat(b.valor) <= parseFloat(valorMaximo))
+    return fornecedorOk && statusOk && valorOk
+  })
+
+  if (ordem === 'valor_asc') {
+    boletosFiltrados.sort((a, b) => a.valor - b.valor)
+  } else if (ordem === 'valor_desc') {
+    boletosFiltrados.sort((a, b) => b.valor - a.valor)
+  } else if (ordem === 'data_asc') {
+    boletosFiltrados.sort((a, b) => new Date(a.vencimento) - new Date(b.vencimento))
+  } else if (ordem === 'data_desc') {
+    boletosFiltrados.sort((a, b) => new Date(b.vencimento) - new Date(a.vencimento))
+  }
+
+  const totalFiltrado = boletosFiltrados.reduce((acc, b) => acc + parseFloat(b.valor || 0), 0)
+
   return (
     <Box>
       <Heading size="lg" mb={4}>
@@ -60,6 +94,57 @@ function Boletos() {
         </Button>
       </Link>
 
+      <Stack direction={{ base: 'column', md: 'row' }} spacing={4} mb={4} flexWrap="wrap">
+        <Input
+          placeholder="Fornecedor"
+          value={fornecedorFiltro}
+          onChange={(e) => setFornecedorFiltro(e.target.value)}
+          maxW="200px"
+        />
+        <Select
+          placeholder="Status"
+          value={statusFiltro}
+          onChange={(e) => setStatusFiltro(e.target.value)}
+          maxW="150px"
+        >
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+          <option value="vencido">Vencido</option>
+        </Select>
+        <InputGroup maxW="150px">
+          <InputLeftAddon>Min R$</InputLeftAddon>
+          <Input
+            type="number"
+            value={valorMinimo}
+            onChange={(e) => setValorMinimo(e.target.value)}
+          />
+        </InputGroup>
+        <InputGroup maxW="150px">
+          <InputLeftAddon>Max R$</InputLeftAddon>
+          <Input
+            type="number"
+            value={valorMaximo}
+            onChange={(e) => setValorMaximo(e.target.value)}
+          />
+        </InputGroup>
+        <Select
+          placeholder="Ordenar por"
+          value={ordem}
+          onChange={(e) => setOrdem(e.target.value)}
+          maxW="180px"
+        >
+          <option value="valor_asc">Valor crescente</option>
+          <option value="valor_desc">Valor decrescente</option>
+          <option value="data_asc">Data mais próxima</option>
+          <option value="data_desc">Data mais distante</option>
+        </Select>
+      </Stack>
+
+      <Text fontSize="sm" mb={2} color="gray.600">
+        <strong>{boletosFiltrados.length}</strong> boletos encontrados — Total: <strong>R$ {totalFiltrado.toFixed(2)}</strong>
+      </Text>
+      <Divider mb={4} />
+
       <Table variant="simple">
         <Thead>
           <Tr>
@@ -71,7 +156,7 @@ function Boletos() {
           </Tr>
         </Thead>
         <Tbody>
-          {boletos.map((boleto) => (
+          {boletosFiltrados.map((boleto) => (
             <Tr key={boleto.id}>
               <Td>{boleto.fornecedor || '-'}</Td>
               <Td>{parseFloat(boleto.valor || 0).toFixed(2)}</Td>
